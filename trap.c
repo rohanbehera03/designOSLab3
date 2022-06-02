@@ -13,6 +13,8 @@ struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
 struct spinlock tickslock;
 uint ticks;
+struct proc *curproc; //initialize current process
+uint fault; //initialize fault
 
 void
 tvinit(void)
@@ -77,6 +79,28 @@ trap(struct trapframe *tf)
             cpuid(), tf->cs, tf->eip);
     lapiceoi();
     break;
+
+
+//Lab 3 Part 2
+case T_PGFLT:
+          curproc = myproc(); //set current process to myprocess
+          fault = rcr2();
+
+          if (fault > CURRTOPSTACK) {
+              exit();
+          }
+          //  go to the default handler and do a kernel panic as before
+          if (allocuvm(curproc->pgdir, PGROUNDDOWN(fault), fault) == 0) {
+              cprintf("Page fault, Allocuvm failed, Current number of pages: %d\n", curproc->stackSize);
+              exit();
+          }
+        //  check if the page fault is caused by an access to the pageguard (the page under
+        //  current top of stack);
+          else {
+              curproc->stackSize = curproc->stackSize + 1; //allocate and map the page
+              cprintf("Increased stack size\n\n", curproc->stackSize, fault);
+          }
+          break;
 
   //PAGEBREAK: 13
   default:

@@ -224,7 +224,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
   char *mem;
   uint a;
 
-  if(newsz >= KERNBASE)
+  if(newsz > KERNBASE) //New upper bound. Lab 3
     return 0;
   if(newsz < oldsz)
     return oldsz;
@@ -319,6 +319,7 @@ copyuvm(pde_t *pgdir, uint sz)
   pte_t *pte;
   uint pa, i, flags;
   char *mem;
+  struct proc *curproc = myproc();
 
   if((d = setupkvm()) == 0)
     return 0;
@@ -335,6 +336,24 @@ copyuvm(pde_t *pgdir, uint sz)
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
       goto bad;
   }
+
+  uint t = KERNBASE-1;
+  t = PGROUNDDOWN(t);
+//Loop to copy the second user stack memory separately from our original xv6 memory. Lab 3
+    for(i = t; i > t - (curproc->stackSize)*PGSIZE; i -= PGSIZE){
+        if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
+            panic("copyuvm: pte should exist again");
+        if(!(*pte & PTE_P))
+            panic("copyuvm: page not present again");
+        pa = PTE_ADDR(*pte);
+        flags = PTE_FLAGS(*pte);
+        if((mem = kalloc()) == 0)
+            goto bad;
+        memmove(mem, (char*)P2V(pa), PGSIZE);
+        if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0)
+            goto bad;
+    }
+
   return d;
 
 bad:
