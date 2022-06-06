@@ -319,7 +319,7 @@ copyuvm(pde_t *pgdir, uint sz)
     pte_t *pte;
     uint pa, i, flags;
     char *mem;
-    struct proc *curproc = myproc();
+//    struct proc *curproc = myproc();
 
     if((d = setupkvm()) == 0)
         return 0;

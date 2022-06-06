@@ -63,9 +63,9 @@ exec(char *path, char **argv)
     // Allocate two pages at the next page boundary.
     // Make the first inaccessible.  Use the second as the user stack.
     sz = PGROUNDUP(sz);
-    sp = KERNBASE-1; //second user stack, points to one address lower than kernel base. Lab 3
+//    sp = KERNBASE-1; //second user stack, points to one address lower than kernel base. Lab 3
 
-    if((allocuvm(pgdir, sp - PGSIZE, sp)) == 0) //Modify exec() function. Lab 3
+    if((sp = allocuvm(pgdir, KERNBASE - 2*PGSIZE, KERNBASE)) == 0) //Modify exec() function. Lab 3
         goto bad;
 //  clearpteu(pgdir, (char*)(sz - 2*PGSIZE));
 //  sp = sz;
