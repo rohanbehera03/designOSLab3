@@ -198,7 +198,8 @@ fork(void)
     }
     np->sz = curproc->sz;
     np->parent = curproc;
-    np->stackSize = curproc->stackSize; //Lab 3
+    np->stackSize = curproc->stackSize; //Null process points to stack size would be equal
+                                        // to current process pointing to the stack size. Lab 3
     *np->tf = *curproc->tf;
 
     // Clear %eax so that fork returns 0 in the child.

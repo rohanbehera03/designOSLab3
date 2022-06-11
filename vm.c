@@ -224,7 +224,7 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
     char *mem;
     uint a;
 
-    if(newsz > KERNBASE) //New upper bound. Lab 3
+    if(newsz > KERNBASE) //New upper bound so KERNBASE is not included after changing stack/page guard. Lab 3
         return 0;
     if(newsz < oldsz)
         return oldsz;

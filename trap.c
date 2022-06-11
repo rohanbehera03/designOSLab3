@@ -85,7 +85,7 @@ trap(struct trapframe *tf)
         case T_PGFLT:
             curproc = myproc(); //set current process to myprocess
             fault = rcr2(); //look up page table entry for faulting address, check if its present but not writable
-            if (fault > CURRTOPSTACK) {
+            if (fault > CURRTOPSTACK) { //Check if faulting address is greater than the maximum positive 32 bit hex val
                 exit();
             }
             //  go to the default handler and do a kernel panic as before
